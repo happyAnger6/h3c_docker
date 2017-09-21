@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	_ "fmt"
 	"log"
 
 	"github.com/docker/docker/pkg/reexec"
@@ -11,8 +11,7 @@ import (
 	"github.com/docker/libnetwork/config"
 )
 
-var controller libnetwork.NewController
-
+var controller libnetwork.NetworkController
 
 func createController() error {
 	networkType := "bridge"
@@ -37,8 +36,25 @@ func main(){
 		log.Fatalf("createController:%s", err)
 	}
 
-	network, err := controller.NewNetwork(networkType, "network1" "")
+	network, err := controller.NewNetwork(networkType, "network1", "")
 	if err != nil {
 		log.Fatalf("controller.NewNetwork:%s", err)
 	}
+
+	ep, err := network.CreateEndpoint("veth_v9_010_a")
+	if err != nil {
+		log.Fatalf("CreateEndpoint:%s", err)
+	}
+
+	cnt, err := controller.NewSandBox("null_container",
+				libnetwork.OptionHostname("test"),
+				libnetwork.OptionDomainname("docker.io"),
+				libnetwork.OptionExtraHost("web", "192.168.0.1"))
+	if err != nil {
+		log.Fatalf("NewSandBox:%s", err)
+	}
+
+	
+	}
+
 }	
